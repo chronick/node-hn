@@ -81,8 +81,8 @@ cli.main(function (args, options) {
               : story.title;
 
       row += "[" + (index < 10? " ":"") + index.toString() + "]";
-      row += "\t" + story.score.split(' ')[0].green;
-      row += "\t" + (story.comments.split(' ')[0] !== 'discuss'? story.comments.split(' ')[0]:"0").italic.yellow;
+      row += "\t" + (story.score?story.score.split(' ')[0]:'0').green;
+      row += "\t" + ((story.comments && story.comments !== 'discuss')?story.comments.split(' ')[0]:'0').italic.yellow;
       row += "\t" + encoder.htmlDecode(title).bold;
       row += "\n";
 
