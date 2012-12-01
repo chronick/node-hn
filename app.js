@@ -74,13 +74,13 @@ cli.main(function (args, options) {
   else {
     console.log("\t"+"Scr".green+"\t"+"Cmt".yellow)
     getNews(function(story,index) {
-      if (index > 27) return;
+      if (index > limit) return;
       var row = "",
         title = story.title.length > 100
               ? story.title.substr(0, 100) + "..." 
               : story.title;
 
-      row += "[" + (index < 10? "0":"") + index.toString() + "]";
+      row += "[" + (index < 10? " ":"") + index.toString() + "]";
       row += "\t" + story.score.split(' ')[0].green;
       row += "\t" + (story.comments.split(' ')[0] !== 'discuss'? story.comments.split(' ')[0]:"0").italic.yellow;
       row += "\t" + encoder.htmlDecode(title).bold;
