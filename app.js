@@ -1,55 +1,92 @@
 #!/usr/bin/env node
 
 /********************
- * Node-Reddit
+ * Node-HackerNews
  *
- * A simple CLI app that reads in Reddit's frontpage and colorizes it
+ * A simple CLI app that reads in HackerNews's frontpage and colorizes it
  *
- * by Kamran Ayub
+ * by Nick Donohue
+ * forked from https://github.com/kamranayub/node-reddit. Thanks!
  * License: WTFPL (http://sam.zoy.org/wtfpl/)
  * Attribution is cool but not required
  ********************/
 
-var cli     = require('cli'),
+var cli     = require('cli'), 
     http    = require('http'),
     request = require('request'),
-    colors  = require('colors');
+    colors  = require('colors'),
+    string  = require('string'),
+    openurl = require('openurl'),
+    htmlEncoder = require('node-html-encoder').Encoder;
+
+var encoder = new htmlEncoder('numerical');
+
+cli.setUsage(
+  'node-hn.js [OPTIONS] [ARTICLE_NO]\n\n' +
+  '  Run with no arguments to show the homepage\'s list of articles.\n'+
+  '  ARTICLE_NO is one of the numbers corresponding to\n'+
+  '    the article on the list.'
+);
+
+var options = cli.parse({
+      comments: ['c','open comments URL for article instead'],
+      article:  ['a','when -c is applied, open both comments and article']
+});
+
+var requestURL = 'http://hndroidapi.appspot.com/news/format/json/page/?appid=node-hn&callback=',
+    commentsURL = 'http://news.ycombinator.com/item?id=';
+
+var getNews = function(callback) {
+  request(requestURL, function (err, res, body) {
+    if (!err && res.statusCode === 200) {
+      var hn = JSON.parse(body),
+          stories = hn.items; 
+      stories.forEach(callback);
+    }
+  }); 
+}
+
+var limit = 27 //arbitrary limit for my screen. modify to taste.
 
 cli.main(function (args, options) {
-  console.log("***********".rainbow);
-  console.log("Node Reddit".cyan);
-  console.log("***********\n\n".rainbow);
 
-  request('http://reddit.com/.json', function (err, res, body) {
-    if (!err && res.statusCode === 200) {
-      var reddit  = JSON.parse(body),
-          stories = reddit.data.children.map(function (s) { 
-                      return s.data; 
-                    });
-      
-      // Descending score
-      stories.sort(function (a, b) { return b.score - a.score; });
-
-      stories.forEach(function (story) {
-        var row = "",
-          title = story.title.length > 100
-                ? story.title.substr(0, 100) + "..." 
-                : story.title;
-
-        // Build row
-        // [score] [title] [comments] [subreddit]
-        // This sucks
-        row += story.score.toString().green + "\t";
-        row += title.bold
-        row += " (" + story.domain + ")";
-        row += (" /r/" + story.subreddit).cyan;
-        row += "\n\t";
-        row += story.author.grey;     
-        row += " " + (story.num_comments + " comments").italic.yellow;
-        row += "\n";
-
-        console.log(row);
+  if (args[0]) {
+    if (string(args[0]).isNumeric()) {
+      getNews(function(story,index) {
+        if (parseInt(args[0]) === index) {
+          if (options.comments) {
+            openurl.open(commentsURL + story.item_id);
+            if (options.article) {
+              openurl.open(story.url);
+            }
+          }
+          else {
+            openurl.open(story.url);
+          }
+        }
       });
     }
-  });
+    else {
+      console.log(help);
+    }
+  }
+
+  else {
+    console.log("\t"+"Scr".green+"\t"+"Cmt".yellow)
+    getNews(function(story,index) {
+      if (index > 27) return;
+      var row = "",
+        title = story.title.length > 100
+              ? story.title.substr(0, 100) + "..." 
+              : story.title;
+
+      row += "[" + (index < 10? "0":"") + index.toString() + "]";
+      row += "\t" + story.score.split(' ')[0].green;
+      row += "\t" + (story.comments.split(' ')[0] !== 'discuss'? story.comments.split(' ')[0]:"0").italic.yellow;
+      row += "\t" + encoder.htmlDecode(title).bold;
+      row += "\n";
+
+      console.log(row);
+    });
+  }
 });
