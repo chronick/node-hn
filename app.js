@@ -30,7 +30,7 @@ cli.setUsage(
 
 var options = cli.parse({
       comments: ['c','open comments URL for article instead'],
-      article:  ['a','when -c is applied, open both comments and article']
+      article:  ['a','when -c is applied, open both comments and article'],
 });
 
 var requestURL = 'http://hndroidapi.appspot.com/news/format/json/page/?appid=node-hn&callback=',
@@ -72,7 +72,7 @@ cli.main(function (args, options) {
   }
 
   else {
-    console.log("\t"+"Scr".green+"\t"+"Cmt".yellow)
+    console.log("HN".magenta + "\t" + "Scr".green + "\t"+"Cmt".yellow)
     getNews(function(story,index) {
       if (index > limit) return;
       var row = "",
@@ -80,10 +80,10 @@ cli.main(function (args, options) {
               ? story.title.substr(0, 100) + "..." 
               : story.title;
 
-      row += "[" + (index < 10? " ":"") + index.toString() + "]";
+      row += ((index < 10? " ":"") + index.toString()).cyan;
       row += "\t" + (story.score?story.score.split(' ')[0]:'0').green;
       row += "\t" + ((story.comments && story.comments !== 'discuss')?story.comments.split(' ')[0]:'0').italic.yellow;
-      row += "\t" + encoder.htmlDecode(title).bold;
+      row += "\t" + encoder.htmlDecode(title);
       row += "\n";
 
       console.log(row);
