@@ -16,10 +16,7 @@ var cli     = require('cli'),
     request = require('request'),
     colors  = require('colors'),
     string  = require('string'),
-    openurl = require('openurl'),
-    htmlEncoder = require('node-html-encoder').Encoder;
-
-var encoder = new htmlEncoder('numerical');
+    openurl = require('openurl')
 
 cli.setUsage(
   'node-hn.js [OPTIONS] [ARTICLE_NO]\n\n' +
@@ -33,7 +30,7 @@ var options = cli.parse({
       article:  ['a','when -c is applied, open both comments and article'],
 });
 
-var requestURL = 'http://hndroidapi.appspot.com/news/format/json/page/?appid=node-hn&callback=',
+var requestURL = 'http://api.ihackernews.com/page',
     commentsURL = 'http://news.ycombinator.com/item?id=';
 
 var getNews = function(callback) {
@@ -81,7 +78,7 @@ cli.main(function (args, options) {
               : story.title;
 
       row += ((index < 10? " ":"") + index.toString()).green;
-      row += "\t" + encoder.htmlDecode(title);
+      row += "\t" + title;
       row += "\n";
 
       console.log(row);
