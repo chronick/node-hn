@@ -72,7 +72,7 @@ cli.main(function (args, options) {
   }
 
   else {
-    console.log("HackerNews".yellow)//+ "\t" + "Scr".green + "\t"+"Cmt".yellow)
+    console.log("HackerNews".yellow)
     getNews(function(story,index) {
       if (index > limit) return;
       var row = "",
@@ -81,8 +81,6 @@ cli.main(function (args, options) {
               : story.title;
 
       row += ((index < 10? " ":"") + index.toString()).green;
-      //row += "\t" + (story.score?story.score.split(' ')[0]:'0').green;
-      //row += "\t" + ((story.comments && story.comments !== 'discuss')?story.comments.split(' ')[0]:'0').italic.yellow;
       row += "\t" + encoder.htmlDecode(title);
       row += "\n";
 

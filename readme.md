@@ -19,20 +19,20 @@ Run without arguments:
 
 Produces:
 
-    HN  Scr Cmt
-     0  49  38  Taleb: The future will not be cool
+    HackerNews
 
-     1  119 96  Editorial: "How piracy changed my life"
+     0  Want to Block Common Passwords? Sorry, That is Patented
 
-     2  52  7   Netflix open sources resilience engineering library
+     1  Solar panels could destroy U.S. utilities, according to U.S. utilities
 
-     3  15  0   CEOs Don't Come Pre-Made, Authentic Leadership Has To Be Learned
+     2  Show HN: Hospice.io €“ Vagrant configurations generator
 
-     4  11  1   Who Do Online Advertisers Think You Are?
+     3  Single page apps in depth
 
-     5  44  26  A tour of the world in d3.js
+     4  Exposed Webcam Viewer
 
-     6  79  28  A static website generator in Python
+     5  Canada's Guide to patents
+
 
 So now all I have to do when I see an interesing article on my desktop is:
 
