@@ -12,7 +12,7 @@
   ],
 
   "bin": {
-    "hn": "./bin/node-hn.js"
+    "hn": "./bin/hn"
   },
   "repository": {
     "type": "git",
