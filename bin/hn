@@ -23,6 +23,7 @@ program
   .usage('hn [OPTIONS] [ARTICLE_NO]')
   .option('-c, --comments', 'open comments URL for article instead')
   .option('-a, --all', 'open both article and comments page')
+  .option('-n, --number <n>', 'number of articles to display', parseInt, 28)
   .parse(process.argv);
 
 var requestURL = 'http://api.ihackernews.com/page',
@@ -38,8 +39,6 @@ var getNews = function(callback) {
   }); 
 };
 
-var limit = 27; // arbitrary limit for my purposes. modify to taste.
-
 (function () {
 
   var article = program.args[0];
@@ -48,7 +47,6 @@ var limit = 27; // arbitrary limit for my purposes. modify to taste.
     if (string(article).isNumeric()) {
       getNews(function(story,index) {
 
-        console.log(story.id);
         if (parseInt(article) === index) {
 
           if (program.comments) {
@@ -73,9 +71,8 @@ var limit = 27; // arbitrary limit for my purposes. modify to taste.
   }
 
   else {
-    console.log("HackerNews".yellow)
     getNews(function(story,index) {
-      if (index > limit) return;
+      if (index > program.number-1) return;
       var row = "",
         title = story.title.length > 100
               ? story.title.substr(0, 100) + "..." 
