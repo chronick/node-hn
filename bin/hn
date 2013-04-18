@@ -16,7 +16,9 @@ var program = require('commander'),
     request = require('request'),
     colors  = require('colors'),
     string  = require('string'),
-    openurl = require('openurl')
+    openurl = require('openurl'),
+    fs      = require('fs'),
+    path    = require('path');
 
 program
   .version('0.2.0')
@@ -26,17 +28,50 @@ program
   .option('-n, --number <n>', 'number of articles to display', parseInt, 28)
   .parse(process.argv);
 
-var requestURL = 'http://api.ihackernews.com/page',
-    commentsURL = 'http://news.ycombinator.com/item?id=';
+var homeDir = function() {
+  return process.env[(process.platform == 'win32') ? 'USERPROFILE': 'HOME'];
+}
 
-var getNews = function(callback) {
-  request(requestURL, function (err, res, body) {
-    if (!err && res.statusCode === 200) {
-      var hn = JSON.parse(body),
-          stories = hn.items; 
+var requestURL = 'http://api.ihackernews.com/page',
+    commentsURL = 'http://news.ycombinator.com/item?id=',
+    cacheFile = path.join(homeDir(),'.node-hn');
+
+var saveCache = function(cacheFileName, jsonBody) {
+  fs.writeFile(cacheFileName, jsonBody, function(err){
+      if(err) throw err;
+  });
+};
+
+var getNews = function(preferCached, callback) {
+
+  var parseNews = function(jsonBody) {
+    var hn = JSON.parse(jsonBody);
+    return hn.items;
+  };
+
+  if (preferCached) {
+    fs.readFile(cacheFile, function(err, body) {
+      var stories = parseNews(body);
       stories.forEach(callback);
-    }
-  }); 
+    });
+  }
+  else {
+    request(requestURL, function (err, res, body) {
+      if (!err && res.statusCode === 200) {
+
+        saveCache(cacheFile, body);
+
+        var stories = parseNews(body);
+        stories.forEach(callback);
+      }
+      else {
+        fs.readFile(cacheFile, function(err, body) {
+          var stories = parseNews(body);
+          stories.forEach(callback);
+        });
+      }
+    }); 
+  }
 };
 
 (function () {
@@ -45,7 +80,7 @@ var getNews = function(callback) {
 
   if (article) {
     if (string(article).isNumeric()) {
-      getNews(function(story,index) {
+      getNews(true, function(story,index) {
 
         if (parseInt(article) === index) {
 
@@ -71,7 +106,8 @@ var getNews = function(callback) {
   }
 
   else {
-    getNews(function(story,index) {
+    console.log ('HackerNews'.yellow);
+    getNews(false, function(story,index) {
       if (index > program.number-1) return;
       var row = "",
         title = story.title.length > 100
