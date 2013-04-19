@@ -42,7 +42,7 @@ var saveCache = function(cacheFileName, jsonBody) {
   });
 };
 
-var getNews = function(preferCached, callback) {
+var getNews = function(preferCached, doOnceCallback, storiesCallback) {
 
   var parseNews = function(jsonBody) {
     var hn = JSON.parse(jsonBody);
@@ -51,8 +51,14 @@ var getNews = function(preferCached, callback) {
 
   if (preferCached) {
     fs.readFile(cacheFile, function(err, body) {
-      var stories = parseNews(body);
-      stories.forEach(callback);
+
+      if (doOnceCallback) { doOnceCallback(true); }
+
+      if (storiesCallback) {
+        var stories = parseNews(body);
+        stories.forEach(storiesCallback);
+      }
+
     });
   }
   else {
@@ -61,13 +67,22 @@ var getNews = function(preferCached, callback) {
 
         saveCache(cacheFile, body);
 
-        var stories = parseNews(body);
-        stories.forEach(callback);
+        if (doOnceCallback) { doOnceCallback(false); }
+
+        if (storiesCallback) {
+          var stories = parseNews(body);
+          stories.forEach(storiesCallback);
+        }
       }
       else {
         fs.readFile(cacheFile, function(err, body) {
-          var stories = parseNews(body);
-          stories.forEach(callback);
+
+          if (doOnceCallback) { doOnceCallback(true); }
+
+          if (storiesCallback) {
+            var stories = parseNews(body);
+            stories.forEach(storiesCallback);
+          }
         });
       }
     }); 
@@ -80,25 +95,28 @@ var getNews = function(preferCached, callback) {
 
   if (article) {
     if (string(article).isNumeric()) {
-      getNews(true, function(story,index) {
+      getNews(
+        true, 
+        false, 
+        function(story,index) {
 
-        if (parseInt(article) === index) {
+          if (parseInt(article) === index) {
 
-          if (program.comments) {
-            openurl.open(commentsURL + story.id);
+            if (program.comments) {
+              openurl.open(commentsURL + story.id);
+            }
+
+            else if (program.all) {
+              openurl.open(story.url);
+              openurl.open(commentsURL + story.id);
+            }
+
+            else {
+              openurl.open(story.url);
+            }
           }
-
-          else if (program.all) {
-            openurl.open(story.url);
-            openurl.open(commentsURL + story.id);
-          }
-
-          else {
-            openurl.open(story.url);
-          }
-
         }
-      });
+      );
     }
     else {
       console.log(help);
@@ -106,19 +124,27 @@ var getNews = function(preferCached, callback) {
   }
 
   else {
-    console.log ('HackerNews'.yellow);
-    getNews(false, function(story,index) {
-      if (index > program.number-1) return;
-      var row = "",
-        title = story.title.length > 100
-              ? story.title.substr(0, 100) + "..." 
-              : story.title;
+    getNews(
+      false, 
+      function(readFromCache) {
+        if (readFromCache)  
+          { console.log('HackerNews'.red); }
+        else                
+          { console.log('HackerNews'.yellow); }
+      },
+      function(story,index) {
+        if (index > program.number-1) return;
+        var row = "",
+          title = story.title.length > 100
+                ? story.title.substr(0, 100) + "..." 
+                : story.title;
 
-      row += ((index < 10? " ":"") + index.toString()).green;
-      row += "\t" + title;
-      row += "\n";
+        row += ((index < 10? " ":"") + index.toString()).green;
+        row += "\t" + title;
+        row += "\n";
 
-      console.log(row);
-    });
+        console.log(row);
+      }
+    );
   }
 })();
