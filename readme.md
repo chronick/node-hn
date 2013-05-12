@@ -3,14 +3,14 @@
 
 This is a simple script for pulling down the HN homepage articles, as well as opening the article links in a browser via the command line. I designed this primarily for use in GeekTool, with the idea being that it would always be on my desktop, and any time an article looks interesting to me I just type ```hn <number>``` and be on my merry way.
 
-To use out of the box:
+To use out of the box (in the ```bin``` directory):
 
-    $ node app.js [-ca] <article_no>
+    $ node hn [-ca] <article_no>
 
 
 I did this to make my life easier:
 
-    $ ln -s /path/to/node-hn/app.js ~/bin/hn
+    $ ln -s /path/to/node-hn/bin/hn ~/bin/hn
 
 
 Run without arguments:
@@ -47,4 +47,10 @@ If I want to see the comments page instead:
 
 Or if I want to open both the article and the comments:
 
-    $ hn -ca <article_no>
+    $ hn -a <article_no>
+
+If I want to specify how many articles are displayed (very useful for geektool):
+    
+    $ hn -n <number>
+
+Have fun!
